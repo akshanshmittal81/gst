@@ -3,10 +3,10 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('./models/User');
 
-const MONGO_URI = process.env.MONGO_URI;
+const MONGO_URI = process.env.MONGODB_URI;
 
 // ✏️ YAHAN APNI DETAILS BHARO
-const USER_EMAIL = 'aniketkansal3007@gmail.com'; // jis user ko edit karna hai
+const USER_EMAIL = 'admin@gmail.com'; // jis user ko edit karna hai
 
 const UPDATE_DATA = {
   name: 'Aniket Kansal',
