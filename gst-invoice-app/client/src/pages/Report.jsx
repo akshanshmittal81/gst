@@ -40,6 +40,7 @@ export default function Report() {
         taxable: inv.subtotal || 0, cgst: inv.cgst || 0, sgst: inv.sgst || 0,
         igst: inv.igst || 0, total: inv.grandTotal || 0, status: inv.status || 'draft',
         isSameState: inv.isSameState,
+        hsn: (inv.items || []).map(it => it.hsn).filter(Boolean).join(', ') || '-',
       });
       acc[key].taxable += inv.subtotal || 0;
       acc[key].cgst += inv.cgst || 0;
@@ -209,7 +210,7 @@ export default function Report() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
-                  {['','#','Party Name','GSTIN','State','Invoices','Taxable Amt','CGST','SGST','IGST','Total'].map((h, i) => (
+                  {['','#','Party Name','GSTIN','State','HSN/SAC','Invoices','Taxable Amt','CGST','SGST','IGST','Total'].map((h, i) => (
                     <th key={i} style={thS(i >= 5)}>{h}</th>
                   ))}
                 </tr>
@@ -244,6 +245,7 @@ export default function Report() {
                         </td>
                         <td style={{ ...tdS(), fontSize: 12, color: '#6e6e60' }}>{row.gstin}</td>
                         <td style={{ ...tdS(), fontSize: 12 }}>{inv.placeOfSupply}</td>
+<td style={{ ...tdS(), fontSize: 12, fontFamily: 'monospace', color: '#6e6e60' }}>{inv.hsn || '-'}</td>
                         <td style={{ ...tdS(true), fontSize: 12 }}>Due: {inv.dueDate}</td>
                         <td style={{ ...tdS(true), fontSize: 12 }}>{formatCurrency(inv.taxable)}</td>
                         <td style={{ ...tdS(true), fontSize: 12 }}>{formatCurrency(inv.cgst)}</td>
