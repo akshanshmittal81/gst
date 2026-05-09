@@ -49,5 +49,5 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/gst-invoi
   })
   .catch(err => {
     console.error('✗ MongoDB connection failed:', err.message);
-    process.exit(1);
+
   });
