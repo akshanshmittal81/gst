@@ -23,7 +23,7 @@ app.use(express.json());
 
 // License verify route
 app.post('/license/verify', (req, res) => {
-  res.json({ valid: true, status: 'active' });
+  res.json({ success: true, valid: true, message: 'License verified' });
 });
 
 // Routes
