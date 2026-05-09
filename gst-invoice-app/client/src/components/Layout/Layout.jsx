@@ -118,7 +118,7 @@ function AboutModal({ onClose, user }) {
                     </span>
                   </div>
                 </div>
-                
+                <a
                   href={'https://wa.me/91' + c.phone}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -128,7 +128,7 @@ function AboutModal({ onClose, user }) {
                   <MessageCircle size={13} />
                   WhatsApp: {c.phone}
                 </a>
-                
+                <a
                   href={'mailto:' + c.email}
                   className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-all hover:bg-black/5"
                   style={{ color: c.color, background: c.color + '10' }}
