@@ -13,6 +13,10 @@ app.use(cors({
   origin: ['http://localhost:3000', 'https://gst-invoice-personal.vercel.app', 'null'],
   credentials: true 
 }));
+// License verify route - always return valid
+app.post('/license/verify', (req, res) => {
+  res.json({ valid: true, message: 'License verified' });
+});
 app.use(express.json());
 
 // Routes
