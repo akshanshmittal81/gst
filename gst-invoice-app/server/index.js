@@ -22,8 +22,8 @@ app.use(cors({
 app.use(express.json());
 
 // License verify route
-app.post('/license/verify', (req, res) => {
-  res.json({ success: true, valid: true, message: 'License verified' });
+app.post('/api/license/verify', (req, res) => {
+  res.json({ success: true, status: 'active' });
 });
 
 // Routes
