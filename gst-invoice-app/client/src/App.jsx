@@ -12,7 +12,7 @@ import InvoicePreviewPage from './pages/InvoicePreviewPage';
 import SettingsPage from './pages/SettingsPage';
 import Layout from './components/Layout/Layout';
 import Report from './pages/Report';
-import LicenseGate from './components/LicenseGate';
+
 
 
 const PrivateRoute = ({ children }) => {
@@ -38,7 +38,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <LicenseGate>
+       
         <InvoiceProvider>
           <Router>
             <Toaster
@@ -66,7 +66,7 @@ export default function App() {
             </Routes>
           </Router>
         </InvoiceProvider>
-        </LicenseGate>
+       
       </AuthProvider>
     </ThemeProvider>
   );
