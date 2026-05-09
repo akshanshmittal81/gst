@@ -33,7 +33,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/gst-invoi
   .then(() => {
     console.log('✓ MongoDB connected');
     const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => console.log(`✓ Server running on port ${PORT}`));
+    app.listen(PORT, '0.0.0.0', () => console.log(`✓ Server running on port ${PORT}`));
   })
   .catch(err => {
     console.error('✗ MongoDB connection failed:', err.message);
