@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'https://gst-invoice-personal.onrender.com/api',
+  baseURL: process.env.REACT_APP_API_URL || 'https://gst-fbwl.onrender.com/api/auth/login',
   headers: { 'Content-Type': 'application/json' },
 });
 
