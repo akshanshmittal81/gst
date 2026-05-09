@@ -10,7 +10,7 @@ const app = express();
 
 // Middleware
 app.use(cors({ 
-  origin: ['http://localhost:3000', 'https://gst-invoice-personal.vercel.app', 'null'],
+  origin: ['http://localhost:3000',   'https://gst-woad-phi.vercel.app', 'null'],
   credentials: true 
 }));
 app.use(express.json());
