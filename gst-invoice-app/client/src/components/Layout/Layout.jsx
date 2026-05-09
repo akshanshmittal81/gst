@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import {
   LayoutDashboard, FileText, Plus, Settings, LogOut,
-  Moon, Sun, Monitor, Menu, X, ChevronDown
+  Moon, Sun, Monitor, Menu, X, Wallet, Package
 } from 'lucide-react';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/invoices/new', icon: Plus, label: 'New Invoice' },
-  { to: '/gstr1', icon: FileText, label: 'Report' },
+  { to: '/gstr1', icon: FileText, label: 'GSTR-1 Report' },
+  { to: '/payments', icon: Wallet, label: 'Payment Tracker' },
+  { to: '/inventory', icon: Package, label: 'Inventory Report' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -30,7 +32,6 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen flex bg-ink-50 dark:bg-ink-950">
-      {/* Mobile overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-20 bg-ink-950/40 backdrop-blur-sm lg:hidden"
@@ -38,7 +39,6 @@ export default function Layout() {
         />
       )}
 
-      {/* Sidebar */}
       <aside className={`
         fixed top-0 left-0 z-30 h-full w-64 bg-white dark:bg-ink-900
         border-r border-ink-200 dark:border-ink-800 flex flex-col
@@ -46,7 +46,6 @@ export default function Layout() {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 lg:static lg:z-auto
       `}>
-        {/* Logo */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-ink-100 dark:border-ink-800">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-ink-800 dark:bg-amber-500 flex items-center justify-center">
@@ -62,7 +61,6 @@ export default function Layout() {
           </button>
         </div>
 
-        {/* Nav */}
         <nav className="flex-1 py-6 px-3 space-y-1">
           {navItems.map(({ to, icon: Icon, label }) => (
             <NavLink
@@ -83,7 +81,6 @@ export default function Layout() {
           ))}
         </nav>
 
-        {/* Theme toggle */}
         <div className="px-3 py-2 border-t border-ink-100 dark:border-ink-800">
           <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-ink-50 dark:bg-ink-800">
             <span className="text-xs font-medium text-ink-500 dark:text-ink-400 flex items-center gap-2">
@@ -111,7 +108,6 @@ export default function Layout() {
           </div>
         </div>
 
-        {/* User */}
         <div className="px-3 py-4 border-t border-ink-100 dark:border-ink-800">
           <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
             <div className="w-8 h-8 rounded-full bg-ink-200 dark:bg-ink-700 flex items-center justify-center text-sm font-bold text-ink-600 dark:text-ink-300">
@@ -131,9 +127,7 @@ export default function Layout() {
         </div>
       </aside>
 
-      {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile header */}
         <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-ink-900 border-b border-ink-200 dark:border-ink-800">
           <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-lg hover:bg-ink-100 dark:hover:bg-ink-800 text-ink-600 dark:text-ink-300">
             <Menu size={20} />
