@@ -43,7 +43,7 @@ function AboutModal({ onClose, user }) {
 
   const handleCopy = () => {
     const text = [
-      '=== GST Studio — Contact Info ===',
+      '=== GST Studio - Contact Info ===',
       '',
       'OWNER: ANIKET KANSAL',
       'Phone/WhatsApp: +91 8126700718',
@@ -57,6 +57,7 @@ function AboutModal({ onClose, user }) {
       'Company: ' + (user?.companyName || '-'),
       'GSTIN: ' + (user?.gstNumber || '-'),
       'Address: ' + (user?.address || '-'),
+      'State: ' + (user?.state || '-'),
     ].join('\n');
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
@@ -71,10 +72,9 @@ function AboutModal({ onClose, user }) {
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
-        className="bg-white dark:bg-ink-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
-        style={{ border: '1px solid #e8e8e0' }}
+        className="bg-white dark:bg-ink-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-y-auto"
+        style={{ border: '1px solid #e8e8e0', maxHeight: '90vh' }}
       >
-        {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-ink-100 dark:border-ink-800">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-ink-800 dark:bg-amber-500 flex items-center justify-center">
@@ -82,7 +82,7 @@ function AboutModal({ onClose, user }) {
             </div>
             <div>
               <p className="font-display font-semibold text-ink-800 dark:text-ink-100 text-sm leading-none">About GST Studio</p>
-              <p className="text-[11px] text-ink-400 mt-0.5">Contact & Business Info</p>
+              <p className="text-xs text-ink-400 mt-0.5">Contact and Business Info</p>
             </div>
           </div>
           <button
@@ -94,16 +94,13 @@ function AboutModal({ onClose, user }) {
         </div>
 
         <div className="p-6 space-y-5">
-
-          {/* Contact Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {CONTACTS.map((c) => (
+            {CONTACTS.map(c => (
               <div
                 key={c.role}
                 className="rounded-xl p-4 border"
                 style={{ background: c.bg, borderColor: c.color + '30' }}
               >
-                {/* Avatar + Role */}
                 <div className="flex items-center gap-3 mb-3">
                   <div
                     className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base flex-shrink-0"
@@ -114,15 +111,13 @@ function AboutModal({ onClose, user }) {
                   <div>
                     <p className="font-semibold text-ink-800 text-sm leading-tight">{c.name}</p>
                     <span
-                      className="text-[10px] font-bold px-2 py-0.5 rounded-full"
+                      className="text-xs font-bold px-2 py-0.5 rounded-full"
                       style={{ background: c.color + '18', color: c.color }}
                     >
                       {c.role}
                     </span>
                   </div>
                 </div>
-
-                {/* WhatsApp Button */}
                 
                   href={'https://wa.me/91' + c.phone}
                   target="_blank"
@@ -133,8 +128,6 @@ function AboutModal({ onClose, user }) {
                   <MessageCircle size={13} />
                   WhatsApp: {c.phone}
                 </a>
-
-                {/* Email */}
                 
                   href={'mailto:' + c.email}
                   className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-xs font-medium transition-all hover:bg-black/5"
@@ -147,59 +140,53 @@ function AboutModal({ onClose, user }) {
             ))}
           </div>
 
-          {/* Business Details */}
           <div className="rounded-xl border border-ink-100 dark:border-ink-800 overflow-hidden">
             <div className="px-4 py-2.5 bg-ink-50 dark:bg-ink-800 border-b border-ink-100 dark:border-ink-700">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-ink-400">Business Details</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-ink-400">Business Details</p>
             </div>
             <div className="divide-y divide-ink-100 dark:divide-ink-800">
               <div className="flex items-start gap-3 px-4 py-3">
                 <Building2 size={14} className="text-ink-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-[10px] text-ink-400 uppercase tracking-wide mb-0.5">Company</p>
-                  <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">{user?.companyName || '—'}</p>
+                  <p className="text-xs text-ink-400 uppercase tracking-wide mb-0.5">Company</p>
+                  <p className="text-sm font-semibold text-ink-800 dark:text-ink-100">{user?.companyName || '-'}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 px-4 py-3">
                 <FileText size={14} className="text-ink-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-[10px] text-ink-400 uppercase tracking-wide mb-0.5">GSTIN</p>
-                  <p className="text-sm font-mono font-semibold text-ink-800 dark:text-ink-100">{user?.gstNumber || '—'}</p>
+                  <p className="text-xs text-ink-400 uppercase tracking-wide mb-0.5">GSTIN</p>
+                  <p className="text-sm font-mono font-semibold text-ink-800 dark:text-ink-100">{user?.gstNumber || '-'}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 px-4 py-3">
                 <MapPin size={14} className="text-ink-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-[10px] text-ink-400 uppercase tracking-wide mb-0.5">Address</p>
-                  <p className="text-sm text-ink-700 dark:text-ink-200 leading-relaxed whitespace-pre-line">{user?.address || '—'}</p>
+                  <p className="text-xs text-ink-400 uppercase tracking-wide mb-0.5">Address</p>
+                  <p className="text-sm text-ink-700 dark:text-ink-200 leading-relaxed whitespace-pre-line">{user?.address || '-'}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3 px-4 py-3">
                 <Info size={14} className="text-ink-400 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-[10px] text-ink-400 uppercase tracking-wide mb-0.5">State</p>
-                  <p className="text-sm text-ink-700 dark:text-ink-200">{user?.state || '—'}</p>
+                  <p className="text-xs text-ink-400 uppercase tracking-wide mb-0.5">State</p>
+                  <p className="text-sm text-ink-700 dark:text-ink-200">{user?.state || '-'}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Copy Button */}
           <button
             onClick={handleCopy}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all"
-            style={{
-              background: copied ? '#16a34a' : '#1c1c18',
-              color: 'white',
-            }}
+            style={{ background: copied ? '#16a34a' : '#1c1c18', color: 'white' }}
           >
             {copied ? <Check size={15} /> : <Copy size={15} />}
             {copied ? 'Copied to Clipboard!' : 'Copy Contact Info'}
           </button>
 
-          {/* Version tag */}
-          <p className="text-center text-[10px] text-ink-300 dark:text-ink-600">
-            GST Studio v1.0 &middot; Built with ❤️ for Indian businesses
+          <p className="text-center text-xs text-ink-300 dark:text-ink-600">
+            GST Studio v1.0 · Built with love for Indian businesses
           </p>
         </div>
       </div>
@@ -231,7 +218,6 @@ export default function Layout() {
         />
       )}
 
-      {/* About Modal */}
       {aboutOpen && <AboutModal onClose={() => setAboutOpen(false)} user={user} />}
 
       <aside className={`
@@ -248,7 +234,7 @@ export default function Layout() {
             </div>
             <div>
               <p className="font-display font-semibold text-ink-800 dark:text-ink-100 text-sm leading-none">GST Studio</p>
-              <p className="text-[10px] text-ink-400 mt-0.5 font-mono">Invoice Manager</p>
+              <p className="text-xs text-ink-400 mt-0.5 font-mono">Invoice Manager</p>
             </div>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-ink-400 hover:text-ink-600">
@@ -274,8 +260,6 @@ export default function Layout() {
               {label}
             </NavLink>
           ))}
-
-          {/* About button — same style as nav links */}
           <button
             onClick={() => { setAboutOpen(true); setSidebarOpen(false); }}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 text-ink-600 dark:text-ink-300 hover:bg-ink-100 dark:hover:bg-ink-800"
@@ -344,7 +328,6 @@ export default function Layout() {
           </div>
           <div className="w-8" />
         </header>
-
         <main className="flex-1 p-4 lg:p-8 overflow-auto animate-fade-in">
           <Outlet />
         </main>
