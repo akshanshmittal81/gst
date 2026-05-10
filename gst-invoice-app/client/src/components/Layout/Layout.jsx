@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { LayoutDashboard, FileText, Plus, Settings, LogOut, Moon, Sun, Monitor, Menu, X, Wallet, Package, Info } from 'lucide-react';
 import AboutModal from './AboutModal';
+import InstallButton from '../InstallButton'; // ✅ add kiya
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -58,6 +59,11 @@ export default function Layout() {
           </button>
         </nav>
 
+        {/* ✅ Install Button - Sidebar mein (desktop) */}
+        <div className="px-3 py-2">
+          <InstallButton />
+        </div>
+
         <div className="px-3 py-2 border-t border-ink-100 dark:border-ink-800">
           <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-ink-50 dark:bg-ink-800">
             <span className="text-xs font-medium text-ink-500 dark:text-ink-400 flex items-center gap-2"><ThemeIcon size={13} /> Theme</span>
@@ -88,13 +94,14 @@ export default function Layout() {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
+        {/* ✅ Mobile header mein Install Button add kiya */}
         <header className="lg:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-ink-900 border-b border-ink-200 dark:border-ink-800">
           <button onClick={() => setSidebarOpen(true)} className="p-2 rounded-lg hover:bg-ink-100 dark:hover:bg-ink-800 text-ink-600 dark:text-ink-300"><Menu size={20} /></button>
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded bg-ink-800 dark:bg-amber-500 flex items-center justify-center"><FileText size={12} className="text-white dark:text-ink-950" /></div>
             <span className="font-display font-semibold text-ink-800 dark:text-ink-100 text-sm">GST Studio</span>
           </div>
-          <div className="w-8" />
+          <InstallButton /> {/* ✅ Mobile header right side */}
         </header>
         <main className="flex-1 p-4 lg:p-8 overflow-auto animate-fade-in"><Outlet /></main>
       </div>
