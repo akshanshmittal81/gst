@@ -6,15 +6,15 @@ const User = require('./models/User');
 const MONGO_URI = process.env.MONGODB_URI;
 
 // ✏️ YAHAN APNI DETAILS BHARO
-const USER_EMAIL = 'admin@gmail.com'; // jis user ko edit karna hai
+const USER_EMAIL = 'admin@gmail.com';
 
 const UPDATE_DATA = {
   name: 'Aniket Kansal',
-  companyName: 'NEW TECH ENTERPRISES',
-  gstNumber: '09HEVPS3324P1ZB',
-  address: 'C-1, KRISHNA KUNJ-II, NEAR BABA FARM HOUSE, Nand Gram, Ghaziabad, 201003\nPAN: HEVPS3324P\nMSME: UDYAM-UP-29-0185368',
+  companyName: 'M/s RIDDHI GOODS',
+  gstNumber: '09AFBPG7155E1ZM',
+  address: 'SECTOR-I, H NO. 215/1, SHASTRI NAGAR ,Ghaziabad UP\nMSME: UDYAM-UP-56-00794118',
   state: 'Uttar Pradesh',
-  contact: '+91 8126700718',
+  contact: '+91 98765 43210',
 };
 
 async function updateUser() {
