@@ -10,11 +10,11 @@ const USER_EMAIL = 'admin@gmail.com'; // jis user ko edit karna hai
 
 const UPDATE_DATA = {
   name: 'Aniket Kansal',
-  companyName: 'M/s RIDDHI GOODS',
-  gstNumber: '09AFBPG7155E1ZM',
-  address: 'SECTOR-I, H NO. 215/1, SHASTRI NAGAR ,Ghaziabad UP\nMSME: UDYAM-UP-56-00794118',
+  companyName: 'NEW TECH ENTERPRISES',
+  gstNumber: '09HEVPS3324P1ZB',
+  address: 'C-1, KRISHNA KUNJ-II, NEAR BABA FARM HOUSE, Nand Gram, Ghaziabad, 201003\nPAN: HEVPS3324P\nMSME: UDYAM-UP-29-0185368',
   state: 'Uttar Pradesh',
-  contact: '',
+  contact: '+91 8126700718',
 };
 
 async function updateUser() {

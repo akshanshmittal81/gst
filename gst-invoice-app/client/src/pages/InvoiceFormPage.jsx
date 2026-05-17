@@ -28,6 +28,7 @@ export default function InvoiceFormPage() {
   const [clientSearch, setClientSearch] = useState('');
   const [showClientDropdown, setShowClientDropdown] = useState(false);
   const [productSearch, setProductSearch] = useState({});
+  const [stockData, setStockData] = useState([]);
   const [showProductDropdown, setShowProductDropdown] = useState({});
   const clientRef = useRef(null);
 
@@ -40,25 +41,43 @@ export default function InvoiceFormPage() {
     email: user?.email || '',
   });
   const [buyer, setBuyer] = useState({ clientName: '', gstNumber: '', address: '', state: '', contact: '' });
+
+  // ✅ Ship To — Bill To se auto-fill, manually editable
+  const [shipTo, setShipTo] = useState({ clientName: '', gstNumber: '', address: '', state: '' });
+  const [shipSameAsBill, setShipSameAsBill] = useState(true); // checkbox for auto-sync
+
   const [meta, setMeta] = useState({
-    invoiceNumber: generateInvoiceNumber(),
+    invoiceNumber: '',
     invoiceDate: new Date().toISOString().split('T')[0],
     dueDate: '',
     notes: '',
     status: 'draft',
+    transport: '',
+    vehicleNo: '',
+    station: '',
+    nug: '',
+    poNo: '',
+    grRrNo: '',
+    reverseCharge: 'No',    // ← add
+    bankDetails: '',         // ← add
+    termsConditions: '',
   });
   const [items, setItems] = useState([emptyItem()]);
 
   const isSameState = seller.state && buyer.state &&
     seller.state.trim().toLowerCase() === buyer.state.trim().toLowerCase();
 
-  // Load saved clients and products
   useEffect(() => {
     api.get('/invoices/meta/clients').then(r => setSavedClients(r.data)).catch(() => { });
     api.get('/invoices/meta/products').then(r => setSavedProducts(r.data)).catch(() => { });
+    api.get('/products').then(r => setStockData(r.data)).catch(() => { });
+    if (!isEdit) {
+      api.get('/invoices/meta/next-number')
+        .then(r => setMeta(p => ({ ...p, invoiceNumber: r.data.nextNumber })))
+        .catch(() => { });
+    }
   }, []);
 
-  // Close client dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
       if (clientRef.current && !clientRef.current.contains(e.target)) {
@@ -76,12 +95,34 @@ export default function InvoiceFormPage() {
         setSeller(inv.seller);
         setBuyer(inv.buyer);
         setClientSearch(inv.buyer?.clientName || '');
+        // ✅ Load saved shipTo if exists, else fill from buyer
+        if (inv.shipTo && inv.shipTo.clientName) {
+          setShipTo(inv.shipTo);
+          setShipSameAsBill(false);
+        } else {
+          setShipTo({
+            clientName: inv.buyer?.clientName || '',
+            gstNumber: inv.buyer?.gstNumber || '',
+            address: inv.buyer?.address || '',
+            state: inv.buyer?.state || '',
+          });
+          setShipSameAsBill(true);
+        }
         setMeta({
           invoiceNumber: inv.invoiceNumber,
           invoiceDate: inv.invoiceDate?.split('T')[0],
           dueDate: inv.dueDate?.split('T')[0] || '',
           notes: inv.notes || '',
           status: inv.status || 'draft',
+          transport: inv.transport || '',
+          vehicleNo: inv.vehicleNo || '',
+          station: inv.station || '',
+          nug: inv.nug || '',
+          poNo: inv.poNo || '',
+          grRrNo: inv.grRrNo || '',
+          reverseCharge: inv.reverseCharge || 'No',
+          bankDetails: inv.bankDetails || '',
+          termsConditions: inv.termsConditions || '',
         });
         setItems(inv.items.map(it => ({ ...it, id: Date.now() + Math.random() })));
       }).catch(() => {
@@ -90,6 +131,18 @@ export default function InvoiceFormPage() {
       }).finally(() => setLoadingInv(false));
     }
   }, [id]);
+
+  // ✅ Jab buyer change ho aur shipSameAsBill true ho toh shipTo bhi update ho
+  useEffect(() => {
+    if (shipSameAsBill) {
+      setShipTo({
+        clientName: buyer.clientName || '',
+        gstNumber: buyer.gstNumber || '',
+        address: buyer.address || '',
+        state: buyer.state || '',
+      });
+    }
+  }, [buyer, shipSameAsBill]);
 
   const calcItemGst = (item) => {
     const base = (Number(item.qty) || 0) * (Number(item.rate) || 0);
@@ -133,14 +186,21 @@ export default function InvoiceFormPage() {
     }));
   };
 
-  // Select a saved client
   const selectClient = (client) => {
     setBuyer({ ...client });
     setClientSearch(client.clientName);
     setShowClientDropdown(false);
+    // ✅ Ship To bhi auto-fill
+    if (shipSameAsBill) {
+      setShipTo({
+        clientName: client.clientName || '',
+        gstNumber: client.gstNumber || '',
+        address: client.address || '',
+        state: client.state || '',
+      });
+    }
   };
 
-  // Select a saved product for a row
   const selectProduct = (itemId, product) => {
     setItems(p => p.map(i => {
       if (i.id !== itemId) return i;
@@ -156,15 +216,25 @@ export default function InvoiceFormPage() {
 
   const buildPayload = () => ({
     seller, buyer,
+    shipTo, // ✅ shipTo bhi save hoga
     invoiceNumber: meta.invoiceNumber,
     invoiceDate: meta.invoiceDate,
     dueDate: meta.dueDate,
     notes: meta.notes,
     status: meta.status,
+    transport: meta.transport,      // ← add
+    vehicleNo: meta.vehicleNo,      // ← add
+    station: meta.station,          // ← add
+    nug: meta.nug,                  // ← add
+    poNo: meta.poNo,                // ← add
+    grRrNo: meta.grRrNo,
     items: items.map(({ id: _id, ...rest }) => rest),
     subtotal: totals.subtotal,
     cgst: totals.cgst, sgst: totals.sgst, igst: totals.igst,
     totalGst: totals.totalGst, grandTotal: totals.grandTotal, isSameState,
+    reverseCharge: meta.reverseCharge,
+    bankDetails: meta.bankDetails,
+    termsConditions: meta.termsConditions,
   });
 
   const handleSave = async (e) => {
@@ -233,6 +303,51 @@ export default function InvoiceFormPage() {
             </div>
           </div>
         </div>
+        {/* Transport Details */}
+        <div className="card p-6">
+          <p className="section-title">Transport Details</p>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label className="label">Transport Company</label>
+              <input value={meta.transport} onChange={e => setMeta(p => ({ ...p, transport: e.target.value }))} className="input" placeholder="A One Transport Co." />
+            </div>
+            <div>
+              <label className="label">Vehicle No</label>
+              <input value={meta.vehicleNo} onChange={e => setMeta(p => ({ ...p, vehicleNo: e.target.value }))} className="input" placeholder="UP 15 AB 1234" />
+            </div>
+            <div>
+              <label className="label">Station</label>
+              <input value={meta.station} onChange={e => setMeta(p => ({ ...p, station: e.target.value }))} className="input" placeholder="Station name" />
+            </div>
+            <div>
+              <label className="label">NUG</label>
+              <input value={meta.nug} onChange={e => setMeta(p => ({ ...p, nug: e.target.value }))} className="input" placeholder="NUG" />
+            </div>
+            <div>
+              <label className="label">P O No.</label>
+              <input value={meta.poNo} onChange={e => setMeta(p => ({ ...p, poNo: e.target.value }))} className="input" placeholder="PO Number" />
+            </div>
+            <div>
+              <label className="label">GR/RR No.</label>
+              <input value={meta.grRrNo} onChange={e => setMeta(p => ({ ...p, grRrNo: e.target.value }))} className="input" placeholder="GR/RR Number" />
+            </div>
+          </div>
+          <div>
+            <label className="label">Reverse Charge</label>
+            <select value={meta.reverseCharge} onChange={e => setMeta(p => ({ ...p, reverseCharge: e.target.value }))} className="input">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </div>
+          <div className="lg:col-span-3">
+            <label className="label">Bank Details</label>
+            <input value={meta.bankDetails} onChange={e => setMeta(p => ({ ...p, bankDetails: e.target.value }))} className="input" placeholder="Bank Name, A/C No, IFSC Code, Branch" />
+          </div>
+          <div className="lg:col-span-3">
+            <label className="label">Terms & Conditions</label>
+            <textarea value={meta.termsConditions} onChange={e => setMeta(p => ({ ...p, termsConditions: e.target.value }))} className="input resize-none" rows={2} placeholder="Payment terms, delivery terms..." />
+          </div>
+        </div>
 
         {/* Seller & Buyer */}
         <div className="grid lg:grid-cols-2 gap-6">
@@ -274,9 +389,8 @@ export default function InvoiceFormPage() {
 
           {/* Buyer - with autocomplete */}
           <div className="card p-6">
-            <p className="section-title">Buyer (Client)</p>
+            <p className="section-title">Buyer (Client) — Bill To</p>
             <div className="space-y-3">
-              {/* Client Name with autocomplete */}
               <div ref={clientRef} className="relative">
                 <label className="label">Client Name *</label>
                 <div className="relative">
@@ -324,7 +438,7 @@ export default function InvoiceFormPage() {
                 </div>
                 <div>
                   <label className="label">Contact</label>
-                  <input value={buyer.contact} onChange={e => setBuyer(p => ({ ...p, contact: e.target.value }))} className="input" placeholder="+91 98765 43210" />
+                  <input value={buyer.contact} onChange={e => setBuyer(p => ({ ...p, contact: e.target.value }))} className="input" placeholder="+91 8126700718" />
                 </div>
               </div>
             </div>
@@ -333,6 +447,74 @@ export default function InvoiceFormPage() {
                 {isSameState ? '✓ Same state → CGST + SGST will apply' : '✓ Different states → IGST will apply'}
               </div>
             )}
+          </div>
+        </div>
+
+        {/* ✅ Ship To Section */}
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <p className="section-title mb-0">Ship To</p>
+            <label className="flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={shipSameAsBill}
+                onChange={e => {
+                  setShipSameAsBill(e.target.checked);
+                  if (e.target.checked) {
+                    setShipTo({
+                      clientName: buyer.clientName || '',
+                      gstNumber: buyer.gstNumber || '',
+                      address: buyer.address || '',
+                      state: buyer.state || '',
+                    });
+                  }
+                }}
+                className="w-4 h-4 accent-ink-800"
+              />
+              <span className="text-xs text-ink-500 font-medium">Same as Bill To</span>
+            </label>
+          </div>
+          <div className="grid lg:grid-cols-2 gap-4">
+            <div>
+              <label className="label">Name</label>
+              <input
+                value={shipTo.clientName}
+                onChange={e => { setShipSameAsBill(false); setShipTo(p => ({ ...p, clientName: e.target.value })); }}
+                className="input font-semibold"
+                placeholder="Ship To Name"
+              />
+            </div>
+            <div>
+              <label className="label">GST / UIN</label>
+              <input
+                value={shipTo.gstNumber}
+                onChange={e => { setShipSameAsBill(false); setShipTo(p => ({ ...p, gstNumber: e.target.value.toUpperCase() })); }}
+                className="input font-mono uppercase"
+                placeholder="GSTIN (optional)"
+                maxLength={15}
+              />
+            </div>
+            <div>
+              <label className="label">Address</label>
+              <textarea
+                value={shipTo.address}
+                onChange={e => { setShipSameAsBill(false); setShipTo(p => ({ ...p, address: e.target.value })); }}
+                className="input resize-none"
+                rows={2}
+                placeholder="Street, City, PIN Code"
+              />
+            </div>
+            <div>
+              <label className="label">State</label>
+              <select
+                value={shipTo.state}
+                onChange={e => { setShipSameAsBill(false); setShipTo(p => ({ ...p, state: e.target.value })); }}
+                className="input"
+              >
+                <option value="">Select State</option>
+                {INDIAN_STATES.map(s => <option key={s}>{s}</option>)}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -366,7 +548,6 @@ export default function InvoiceFormPage() {
                   return (
                     <tr key={item.id} className="group">
                       <td className="px-3 py-3 text-sm text-ink-400 text-center w-8">{index + 1}</td>
-                      {/* Product with autocomplete */}
                       <td className="px-3 py-3 min-w-[180px]">
                         <div className="relative">
                           <input
@@ -390,7 +571,15 @@ export default function InvoiceFormPage() {
                                 <button key={i} type="button" onMouseDown={() => selectProduct(item.id, prod)}
                                   className="w-full text-left px-4 py-2.5 hover:bg-ink-50 dark:hover:bg-ink-800 transition-colors border-b border-ink-50 dark:border-ink-800 last:border-0">
                                   <p className="text-sm font-semibold text-ink-800 dark:text-ink-100 whitespace-normal break-words leading-snug">{prod.name}</p>
-                                  <p className="text-xs text-ink-400">HSN: {prod.hsn || '-'} · ₹{prod.rate} · {prod.gstPct}%</p>
+                                  <p className="text-xs text-ink-400">
+                                    HSN: {prod.hsn || '-'} · ₹{prod.rate} · {prod.gstPct}%
+                                    {(() => {
+                                      const s = stockData.find(p => p.name?.toLowerCase() === prod.name?.toLowerCase());
+                                      return s ? <span style={{ marginLeft: 6, color: s.currentStock <= 5 ? '#dc2626' : '#16a34a', fontWeight: 600 }}>
+                                        Stock: {s.currentStock} {s.unit}
+                                      </span> : null;
+                                    })()}
+                                  </p>
                                 </button>
                               ))}
                             </div>
@@ -419,10 +608,7 @@ export default function InvoiceFormPage() {
                       </td>
                       <td className="px-3 py-3 min-w-[90px]">
                         <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.1"
+                          type="number" min="0" max="100" step="0.1"
                           value={item.gstPct}
                           onChange={e => updateItem(item.id, 'gstPct', e.target.value === '' ? 0 : Number(e.target.value))}
                           className="input text-center font-mono"
@@ -515,4 +701,3 @@ export default function InvoiceFormPage() {
     </div>
   );
 }
-

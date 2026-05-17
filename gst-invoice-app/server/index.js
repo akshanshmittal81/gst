@@ -21,15 +21,12 @@ app.use(cors({
 
 app.use(express.json());
 
-// License verify route
-app.post('/api/license/verify', (req, res) => {
-  res.json({ success: true, status: 'active' });
-});
+
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/invoices', invoiceRoutes);
-app.use('/api/license', require('./routes/license-route'));
+
 
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));

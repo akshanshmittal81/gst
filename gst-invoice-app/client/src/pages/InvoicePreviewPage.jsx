@@ -45,7 +45,10 @@ export default function InvoicePreviewPage() {
   );
   if (!invoice) return null;
 
-  const { seller, buyer, items = [], subtotal = 0, cgst = 0, sgst = 0, igst = 0, grandTotal = 0, isSameState } = invoice;
+  const { seller, buyer, shipTo, items = [], subtotal = 0, cgst = 0, sgst = 0, igst = 0, grandTotal = 0, isSameState } = invoice;
+
+  // ✅ Ship To fallback — agar purana invoice hai jisme shipTo nahi tha
+  const shipToData = shipTo?.clientName ? shipTo : buyer;
 
   const scaledHeight = 1123 * scale;
 
@@ -73,7 +76,7 @@ export default function InvoicePreviewPage() {
         </div>
       </div>
 
-      {/* A4 Invoice — auto height, no fixed minHeight */}
+      {/* A4 Invoice */}
       <div
         ref={printRef}
         className="invoice-preview bg-white text-ink-800 shadow-2xl rounded-xl overflow-hidden"
@@ -91,49 +94,88 @@ export default function InvoicePreviewPage() {
         }}
       >
         {/* Header */}
-        <div style={{ background: '#f4f4f0', padding: '28px 36px 20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                <div style={{ width: '32px', height: '32px', flexShrink: 0, background: '#1c1c18', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <FileText size={16} color="white" />
-                </div>
-                <h1 style={{ fontSize: '20px', fontWeight: '700', color: '#1c1c18', margin: 0, wordBreak: 'break-word' }}>
-                  {seller?.companyName || 'Company Name'}
-                </h1>
-              </div>
-              <p style={{ color: '#6e6e60', fontSize: '12px', margin: '0 0 3px 42px', lineHeight: 1.6, wordBreak: 'break-word', whiteSpace: 'pre-line' }}>{seller?.address}</p>
-              <p style={{ color: '#1c1c18', fontSize: '12px', fontWeight: '600', margin: '0 0 3px 42px' }}>GSTIN: {seller?.gstNumber}</p>
-              {seller?.contact && <p style={{ color: '#6e6e60', fontSize: '11px', margin: '0 0 0 42px' }}>{seller?.contact} &middot; {seller?.email}</p>}
+        <div style={{ borderBottom: '2px solid #1c1c18' }}>
+          {/* Company name centered */}
+          <div style={{ textAlign: 'center', padding: '16px 36px 8px', borderBottom: '1px solid #e8e8e0' }}>
+            <p style={{ fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '3px', color: '#6e6e60', margin: '0 0 4px' }}>TAX INVOICE</p>
+            <h1 style={{ fontSize: '22px', fontWeight: '700', color: '#1c1c18', margin: '0 0 4px' }}>{seller?.companyName || 'Company Name'}</h1>
+            <p style={{ fontSize: '11px', color: '#6e6e60', margin: '0 0 2px' }}>{seller?.address}</p>
+            <p style={{ fontSize: '11px', color: '#1c1c18', margin: '0 0 2px' }}>Tel. : {seller?.contact} email : <span style={{ color: '#1c1c18' }}>abhiyantsalescorporation@gmail.com</span></p>
+          </div>
+
+          {/* GSTIN + Invoice details + Transport — 2 column box */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderBottom: '1px solid #e8e8e0' }}>
+            {/* Left — Invoice details */}
+            <div style={{ borderRight: '1px solid #e8e8e0', padding: '10px 14px' }}>
+              <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
+                <tbody>
+                  <tr><td style={{ color: '#6e6e60', paddingBottom: '3px', width: '45%' }}>GSTIN</td><td style={{ fontWeight: '600', paddingBottom: '3px' }}>: {seller?.gstNumber}</td></tr>
+                  <tr><td style={{ color: '#6e6e60', paddingBottom: '3px' }}>Invoice No.</td><td style={{ fontWeight: '600', paddingBottom: '3px' }}>: {invoice.invoiceNumber}</td></tr>
+                  <tr><td style={{ color: '#6e6e60', paddingBottom: '3px' }}>Date of Invoice</td><td style={{ fontWeight: '600', paddingBottom: '3px' }}>: {formatDate(invoice.invoiceDate)}</td></tr>
+                  <tr><td style={{ color: '#6e6e60', paddingBottom: '3px' }}>Place of Supply</td><td style={{ fontWeight: '600', paddingBottom: '3px' }}>: {seller?.state}</td></tr>
+                  <tr><td style={{ color: '#6e6e60', paddingBottom: '3px' }}>Reverse Charge</td><td style={{ fontWeight: '600', paddingBottom: '3px' }}>: {invoice.reverseCharge || 'No'}</td></tr>
+                  <tr><td style={{ color: '#6e6e60' }}>GR/RR No.</td><td style={{ fontWeight: '600' }}>: {invoice.grRrNo || '-'}</td></tr>
+                </tbody>
+              </table>
             </div>
-            <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              <p style={{ fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '2px', color: '#6e6e60', margin: '0 0 6px' }}>Tax Invoice</p>
-              <p style={{ fontSize: '15px', fontWeight: '700', color: '#1c1c18', fontFamily: 'JetBrains Mono, monospace', margin: '0 0 4px' }}>{invoice.invoiceNumber}</p>
-              <p style={{ fontSize: '12px', color: '#6e6e60', margin: '0 0 2px' }}>Date: {formatDate(invoice.invoiceDate)}</p>
-              <p style={{ fontSize: '12px', color: '#6e6e60', margin: 0 }}>Due: {formatDate(invoice.dueDate)}</p>
+
+            {/* Right — Transport details */}
+            <div style={{ padding: '10px 14px' }}>
+              <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
+                <tbody>
+                  <tr><td style={{ color: '#6e6e60', paddingBottom: '3px', width: '45%' }}>Transport</td><td style={{ fontWeight: '600', paddingBottom: '3px' }}>: {invoice.transport || '-'}</td></tr>
+                  <tr><td style={{ color: '#6e6e60', paddingBottom: '3px' }}>Vehicle No</td><td style={{ fontWeight: '600', paddingBottom: '3px' }}>: {invoice.vehicleNo || '-'}</td></tr>
+                  <tr><td style={{ color: '#6e6e60', paddingBottom: '3px' }}>Station</td><td style={{ fontWeight: '600', paddingBottom: '3px' }}>: {invoice.station || '-'}</td></tr>
+                  <tr><td style={{ color: '#6e6e60', paddingBottom: '3px' }}>NUG</td><td style={{ fontWeight: '600', paddingBottom: '3px' }}>: {invoice.nug || '-'}</td></tr>
+                  <tr><td style={{ color: '#6e6e60' }}>P O No.</td><td style={{ fontWeight: '600' }}>: {invoice.poNo || '-'}</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
-
-        {/* Bill to + Supply info */}
+        {/* ✅ Bill To + Ship To (Supply Details hataya) */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: '#e8e8e0', margin: '0 36px', borderRadius: '8px', overflow: 'hidden' }}>
+          {/* Bill To */}
           <div style={{ background: 'white', padding: '14px 18px' }}>
-            <p style={{ fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#909080', margin: '0 0 6px' }}>Bill To</p>
+            <p style={{ fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#909080', margin: '0 0 6px' }}>Billed To</p>
             <p style={{ fontSize: '14px', fontWeight: '700', color: '#1c1c18', margin: '0 0 4px', wordBreak: 'break-word' }}>{buyer?.clientName}</p>
             <p style={{ fontSize: '12px', color: '#1c1c18', margin: '0 0 2px', lineHeight: 1.5, wordBreak: 'break-word', whiteSpace: 'pre-line' }}>{buyer?.address}</p>
-            {buyer?.gstNumber && <p style={{ fontSize: '12px', color: '#1c1c18', margin: 0 }}>GSTIN: {buyer?.gstNumber}</p>}
+            {buyer?.gstNumber && (
+              <p style={{ fontSize: '12px', color: '#6e6e60', margin: '4px 0 0', fontWeight: '600' }}>
+                GSTIN / UIN &nbsp;: &nbsp;{buyer?.gstNumber}
+              </p>
+            )}
           </div>
+          {/* Ship To */}
           <div style={{ background: 'white', padding: '14px 18px' }}>
-            <p style={{ fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#909080', margin: '0 0 6px' }}>Supply Details</p>
-            <p style={{ fontSize: '12px', color: '#6e6e60', margin: '0 0 3px' }}>Seller State: <strong style={{ color: '#1c1c18' }}>{seller?.state}</strong></p>
-            <p style={{ fontSize: '12px', color: '#6e6e60', margin: '0 0 3px' }}>Buyer State: <strong style={{ color: '#1c1c18' }}>{buyer?.state}</strong></p>
-            <p style={{ fontSize: '12px', color: '#6e6e60', margin: 0 }}>
-              Tax Type: <strong style={{ color: isSameState ? '#2563eb' : '#d97706' }}>
-                {isSameState ? 'CGST + SGST' : 'IGST'}
-              </strong>
-            </p>
+            <p style={{ fontSize: '10px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px', color: '#909080', margin: '0 0 6px' }}>Shipped To</p>
+            <p style={{ fontSize: '14px', fontWeight: '700', color: '#1c1c18', margin: '0 0 4px', wordBreak: 'break-word' }}>{shipToData?.clientName}</p>
+            <p style={{ fontSize: '12px', color: '#1c1c18', margin: '0 0 2px', lineHeight: 1.5, wordBreak: 'break-word', whiteSpace: 'pre-line' }}>{shipToData?.address}</p>
+            {shipToData?.gstNumber && (
+              <p style={{ fontSize: '12px', color: '#6e6e60', margin: '4px 0 0', fontWeight: '600' }}>
+                GSTIN / UIN &nbsp;: &nbsp;{shipToData?.gstNumber}
+              </p>
+            )}
           </div>
         </div>
+        {/* Transport Details */}
+        {(invoice.transport || invoice.vehicleNo || invoice.station || invoice.nug || invoice.poNo || invoice.grRrNo) && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1px', background: '#e8e8e0', margin: '12px 36px 0', borderRadius: '8px', overflow: 'hidden' }}>
+            {[
+              { label: 'Transport', value: invoice.transport },
+              { label: 'Vehicle No', value: invoice.vehicleNo },
+              { label: 'Station', value: invoice.station },
+              { label: 'NUG', value: invoice.nug },
+              { label: 'P O No.', value: invoice.poNo },
+              { label: 'GR/RR No.', value: invoice.grRrNo },
+            ].map(({ label, value }) => value ? (
+              <div key={label} style={{ background: 'white', padding: '8px 14px' }}>
+                <p style={{ fontSize: '9px', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1px', color: '#909080', margin: '0 0 3px' }}>{label}</p>
+                <p style={{ fontSize: '12px', fontWeight: '600', color: '#1c1c18', margin: 0 }}>{value}</p>
+              </div>
+            ) : null)}
+          </div>
+        )}
 
         {/* Items table */}
         <div style={{ margin: '20px 36px 0' }}>
@@ -142,12 +184,12 @@ export default function InvoicePreviewPage() {
               <tr style={{ background: '#1c1c18', color: 'white' }}>
                 {['#', 'Product/Service', 'HSN/SAC', 'Unit', 'Qty', 'Rate (₹)', 'Taxable Amt', 'GST %',
                   ...(isSameState ? ['CGST (₹)', 'SGST (₹)'] : ['IGST (₹)']), 'Amount (₹)'].map((h) => (
-                  <th key={h} style={{
-                    padding: '9px 5px', textAlign: 'center',
-                    fontWeight: '600', fontSize: '9.5px', textTransform: 'uppercase',
-                    letterSpacing: '0.2px', whiteSpace: 'nowrap'
-                  }}>{h}</th>
-                ))}
+                    <th key={h} style={{
+                      padding: '9px 5px', textAlign: 'center',
+                      fontWeight: '600', fontSize: '9.5px', textTransform: 'uppercase',
+                      letterSpacing: '0.2px', whiteSpace: 'nowrap'
+                    }}>{h}</th>
+                  ))}
               </tr>
             </thead>
             <tbody>
@@ -220,15 +262,28 @@ export default function InvoicePreviewPage() {
           </div>
         )}
 
-        {/* Footer */}
-        <div style={{ margin: '28px 36px 0', paddingTop: '18px', borderTop: '1px solid #e8e8e0', display: 'flex', justifyContent: 'flex-end', paddingBottom: '36px' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ width: '160px', height: '48px', border: '1px dashed #d0d0c4', borderRadius: '4px', marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <p style={{ fontSize: '10px', color: '#d0d0c4', margin: 0 }}>Authorized Signature</p>
+        {/* Bank Details + Terms + Signature */}
+        <div style={{ margin: '14px 36px 28px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1px', background: '#e8e8e0', border: '1px solid #e8e8e0' }}>
+          <div style={{ background: 'white', padding: '10px 14px', borderRight: '1px solid #e8e8e0' }}>
+            {invoice.bankDetails && <>
+              <p style={{ fontSize: '10px', fontWeight: '700', color: '#1c1c18', margin: '0 0 4px' }}>Bank Details</p>
+              <p style={{ fontSize: '11px', color: '#1c1c18', margin: 0, lineHeight: 1.6 }}>{invoice.bankDetails}</p>
+            </>}
+            {invoice.termsConditions && <>
+              <p style={{ fontSize: '10px', fontWeight: '700', color: '#1c1c18', margin: '10px 0 4px' }}>Terms & Conditions</p>
+              <p style={{ fontSize: '11px', color: '#6e6e60', margin: 0, lineHeight: 1.6 }}>{invoice.termsConditions}</p>
+            </>}
+          </div>
+          <div style={{ background: 'white', padding: '10px 14px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between' }}>
+            <p style={{ fontSize: '10px', color: '#6e6e60', margin: '0 0 4px' }}>Receiver Signature:</p>
+            <div style={{ flex: 1 }} />
+            <div>
+              <p style={{ fontSize: '11px', fontWeight: '700', color: '#1c1c18', margin: '0 0 24px' }}>For {seller?.companyName}</p>
+              <p style={{ fontSize: '11px', fontWeight: '600', color: '#1c1c18', margin: 0 }}>Authorized Signatory</p>
             </div>
-            <p style={{ fontSize: '11px', fontWeight: '600', color: '#1c1c18', margin: 0 }}>For {seller?.companyName}</p>
           </div>
         </div>
+
       </div>
       <div className="h-12" />
     </div>
